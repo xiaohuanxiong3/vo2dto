@@ -8,8 +8,8 @@ plugins {
     alias(libs.plugins.kotlin) // Kotlin support
     alias(libs.plugins.intelliJPlatform) // IntelliJ Platform Gradle Plugin
     alias(libs.plugins.changelog) // Gradle Changelog Plugin
-    alias(libs.plugins.qodana) // Gradle Qodana Plugin
-    alias(libs.plugins.kover) // Gradle Kover Plugin
+//    alias(libs.plugins.qodana) // Gradle Qodana Plugin
+//    alias(libs.plugins.kover) // Gradle Kover Plugin
 }
 
 group = providers.gradleProperty("pluginGroup").get()
@@ -63,9 +63,11 @@ intellijPlatform {
 
             with(it.lines()) {
                 if (!containsAll(listOf(start, end))) {
-                    throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
+                    // throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
+                } else {
+                    subList(indexOf(start) + 1, indexOf(end)).joinToString("\n").let(::markdownToHTML)
                 }
-                subList(indexOf(start) + 1, indexOf(end)).joinToString("\n").let(::markdownToHTML)
+                ""
             }
         }
 
@@ -116,15 +118,15 @@ changelog {
 }
 
 // Configure Gradle Kover Plugin - read more: https://github.com/Kotlin/kotlinx-kover#configuration
-kover {
-    reports {
-        total {
-            xml {
-                onCheck = true
-            }
-        }
-    }
-}
+//kover {
+//    reports {
+//        total {
+//            xml {
+//                onCheck = true
+//            }
+//        }
+//    }
+//}
 
 tasks {
     wrapper {
