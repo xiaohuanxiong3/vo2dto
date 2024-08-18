@@ -22,6 +22,7 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiType;
 import com.intellij.psi.PsiVariable;
 import com.intellij.psi.impl.source.PsiJavaFileImpl;
 import com.intellij.psi.search.GlobalSearchScope;
@@ -104,6 +105,7 @@ public class GenerateVo2DtoImpl extends AbstractGenerateVo2Dto {
                 isUsedLombokBuilder(psiClass));
     }
 
+    @Deprecated
     @Override
     protected GetObjConfigDO getGetConfigDOByPsiVariable(GenerateContext generateContext, PsiVariable psiVariable) {
         // 获取 PsiClass 实例
@@ -124,6 +126,30 @@ public class GenerateVo2DtoImpl extends AbstractGenerateVo2Dto {
             }
 
             return new GetObjConfigDO(psiClass.getQualifiedName(), psiClass.getName(), psiVariable.getName(), paramMtdMap);
+        }
+        return null;
+    }
+
+    @Override
+    protected GetObjConfigDO getGetConfigDOByPsiTypeAndExpressionText(GenerateContext generateContext, PsiType type, String expressionText) {
+        // 获取 PsiClass 实例
+        PsiClass psiClass = PsiUtil.resolveClassInType(type);
+
+        if (psiClass != null) {
+            List<PsiClass> psiClassLinkList = getPsiClassLinkList(psiClass);
+
+            Map<String, String> paramMtdMap = new HashMap<>();
+            Pattern getM = Pattern.compile(getRegex);
+
+            for (PsiClass psi : psiClassLinkList) {
+                MethodVO methodVO = getMethods(psi, getRegex, "get");
+                for (String methodName : methodVO.getMethodNameList()) {
+                    String param = getM.matcher(methodName).replaceAll("$1").toLowerCase();
+                    paramMtdMap.put(param, methodName);
+                }
+            }
+
+            return new GetObjConfigDO(psiClass.getQualifiedName(), psiClass.getName(), expressionText, paramMtdMap);
         }
         return null;
     }

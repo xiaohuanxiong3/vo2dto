@@ -22,6 +22,7 @@ public abstract class AbstractGenerateVo2Dto implements IGenerateVo2Dto {
     protected final String setRegex = "set(\\w+)";
     protected final String getRegex = "get(\\w+)";
 
+    @Deprecated
     @Override
     public void doGenerate(Project project, DataContext dataContext, PsiVariable toPsiVariable, PsiVariable fromPsiVariable) {
         // 1. 获取上下文
@@ -45,11 +46,37 @@ public abstract class AbstractGenerateVo2Dto implements IGenerateVo2Dto {
         }
     }
 
+    @Override
+    public void doGenerate(Project project, DataContext dataContext, PsiVariable toPsiVariable, PsiType fromType, String fromExpressionText) {
+        // 1. 获取上下文
+        GenerateContext generateContext = this.getGenerateContext(project, dataContext, toPsiVariable);
+
+        // 2. 获取要设置属性的对象的 set 方法集合
+        SetObjConfigDO setObjConfigDO = this.getSetObjConfigDO(generateContext, toPsiVariable);
+
+        // 3. 获取要获取属性的对象的 get 方法集合 【类名和属性名透传过来】
+        GetObjConfigDO getObjConfigDO = getGetConfigDOByPsiTypeAndExpressionText(generateContext, fromType, fromExpressionText);
+
+        // 4. 弹框选择，织入代码。分为弹窗提醒和非弹窗提醒
+        DataSetting.DataState state = DataSetting.getInstance(project).getState();
+        assert state != null;
+        if ("hide".equals(state.getConfigRadio())) {
+            this.weavingSetGetCode(generateContext, setObjConfigDO, getObjConfigDO);
+        } else {
+            ApplicationManager.getApplication().invokeLater(() -> {
+                this.convertSetting(project, generateContext, setObjConfigDO, getObjConfigDO);
+            });
+        }
+    }
+
     protected abstract GenerateContext getGenerateContext(Project project, DataContext dataContext, PsiElement psiElement);
 
     protected abstract SetObjConfigDO getSetObjConfigDO(GenerateContext generateContext, PsiVariable variable);
 
+    @Deprecated
     protected abstract GetObjConfigDO getGetConfigDOByPsiVariable(GenerateContext generateContext, PsiVariable variable);
+
+    protected abstract GetObjConfigDO getGetConfigDOByPsiTypeAndExpressionText(GenerateContext generateContext, PsiType type, String expressionText);
 
     protected abstract void convertSetting(Project project, GenerateContext generateContext, SetObjConfigDO setObjConfigDO, GetObjConfigDO getObjConfigDO);
 

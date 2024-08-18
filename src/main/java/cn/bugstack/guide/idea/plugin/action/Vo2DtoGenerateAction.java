@@ -1,6 +1,7 @@
 package cn.bugstack.guide.idea.plugin.action;
 
-import cn.bugstack.guide.idea.plugin.ui.LocalVarInputDialog;
+import cn.bugstack.guide.idea.plugin.ui.ActionXSourcePosition;
+import cn.bugstack.guide.idea.plugin.ui.SimpleAutoCompletionEditor;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
@@ -17,7 +18,6 @@ import com.intellij.psi.PsiIdentifier;
 import com.intellij.psi.PsiLocalVariable;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiModifier;
-import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.PsiParameter;
 import com.intellij.psi.PsiVariable;
 import com.intellij.psi.PsiWhiteSpace;
@@ -55,12 +55,16 @@ public class Vo2DtoGenerateAction extends AnAction {
                 Messages.showErrorDialog(project, "请将光标移动到局部变量变量名上后，再进行vo2dto操作", "错误提示");
                 return;
             }
-            List<PsiVariable> variables = getAccessibleVariables(psiElement);
-            List<String> suggestions = variables.stream().map(PsiNamedElement::getName).toList();
-            LocalVarInputDialog dialog = new LocalVarInputDialog(event, variables, suggestions);
-            ApplicationManager.getApplication().invokeLater(() -> {
-                dialog.setVisible(true);
-            });
+//            List<PsiVariable> variables = getAccessibleVariables(psiElement);
+//            List<String> suggestions = variables.stream().map(PsiNamedElement::getName).toList();
+//            LocalVarInputDialog dialog = new LocalVarInputDialog(event, variables, suggestions);
+//            ApplicationManager.getApplication().invokeLater(() -> {
+//                dialog.setVisible(true);
+//            });
+//            SimpleAutoCompletionEditor simpleAutoCompletionEditor = new SimpleAutoCompletionEditor(project, null);
+            ActionXSourcePosition sourcePosition = new ActionXSourcePosition(editor.getCaretModel().getLogicalPosition().line + 1, editor.getCaretModel().getOffset(), editor.getVirtualFile());
+            SimpleAutoCompletionEditor simpleAutoCompletionEditor = new SimpleAutoCompletionEditor(project, event.getDataContext(), sourcePosition);
+            ApplicationManager.getApplication().invokeLater(simpleAutoCompletionEditor::show);
 
         } catch (Exception e) {
             log.error("caught error in vo2dto action", e);

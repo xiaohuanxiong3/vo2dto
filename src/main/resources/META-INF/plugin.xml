@@ -126,6 +126,8 @@
         <!-- 配置 File -> Settings -> Tools -->
         <projectConfigurable groupId="tools" displayName="Vo2Dto Config" id="vo2dto"
                              instance="cn.bugstack.guide.idea.plugin.action.ConfigSettingFactory"/>
+
+<!--        <typedHandler implementation="cn.bugstack.guide.idea.plugin.test.TypeHandler" />-->
     </extensions>
 
     <actions>
@@ -133,7 +135,7 @@
         <action id="Vo2DtoGenerateAction" class="cn.bugstack.guide.idea.plugin.action.Vo2DtoGenerateAction"
                 text="Vo2Dto - 小傅哥" description="Vo2Dto generate util">
             <add-to-group group-id="GenerateGroup" anchor="last"/>
-            <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift G"/>
+<!--            <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift G"/>-->
         </action>
     </actions>
 

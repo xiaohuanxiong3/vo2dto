@@ -28,6 +28,7 @@ import java.util.Objects;
  * @Author Handsome Young
  * @Date 2024/8/8 22:25
  */
+@Deprecated
 public class LocalVarInputDialog extends JDialog {
 
     // 静态自动补全输入框
