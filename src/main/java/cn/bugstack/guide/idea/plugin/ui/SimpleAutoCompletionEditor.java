@@ -99,8 +99,8 @@ public class SimpleAutoCompletionEditor extends DialogWrapper {
         PsiExpression expression = myElementFactory.createExpressionFromText(myTextFiled.getText(), myContext);
         String expressionText = expression.getText();
         PsiType type = expression.getType();
-        if (type == null || type instanceof PsiPrimitiveType) {
-            Messages.showErrorDialog(myProject, "请输入有效的表达式!（不允许输入Java基本类型）", "错误提示");
+        if (type == null || type instanceof PsiPrimitiveType || expressionText.equals( ((PsiVariable) myDataContext.getData(CommonDataKeys.PSI_ELEMENT)).getName() )) {
+            Messages.showErrorDialog(myProject, "请输入有效的表达式!（表达式的值也不应该为Java基本类型）", "错误提示");
             return;
         }
         ApplicationManager.getApplication().executeOnPooledThread(() -> {

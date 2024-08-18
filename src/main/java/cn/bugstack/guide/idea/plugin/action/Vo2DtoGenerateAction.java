@@ -2,19 +2,24 @@ package cn.bugstack.guide.idea.plugin.action;
 
 import cn.bugstack.guide.idea.plugin.ui.ActionXSourcePosition;
 import cn.bugstack.guide.idea.plugin.ui.SimpleAutoCompletionEditor;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiCodeBlock;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiField;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiIdentifier;
+import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiLocalVariable;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiModifier;
@@ -40,6 +45,28 @@ import java.util.List;
 public class Vo2DtoGenerateAction extends AnAction {
 
     private static final Logger log = LoggerFactory.getLogger(Vo2DtoGenerateAction.class);
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
+    }
+
+    @Override
+    public void update(@NotNull AnActionEvent e) {
+        try {
+            // 获取当前项目、编辑器和文件
+            Project project = e.getProject();
+            Editor editor = e.getData(CommonDataKeys.EDITOR);
+            PsiFile psiFile = ReadAction.compute((ThrowableComputable<PsiFile, Throwable>) () -> e.getData(CommonDataKeys.PSI_FILE));
+            // 检查是否为Java文件
+            boolean isJavaFile = (psiFile instanceof PsiJavaFile);
+
+            // 设置Action的可见性
+            e.getPresentation().setEnabledAndVisible(project != null && editor != null && isJavaFile);
+        } catch (Throwable ex) {
+            log.info("exception caught when get PsiFile : {}", ex.getMessage());
+        }
+    }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent event) {
@@ -70,6 +97,7 @@ public class Vo2DtoGenerateAction extends AnAction {
             log.error("caught error in vo2dto action", e);
         }
     }
+
 
     /**
      * 判断元素是否是局部变量变量名（标识符之前或之后的空格也算）
